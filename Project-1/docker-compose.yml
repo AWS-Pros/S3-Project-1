@@ -1,0 +1,66 @@
+version: "3.8"
+
+volumes:
+  db_vol:
+    name: "postgres-vol"
+services:
+  # Postgres Container
+  p_db:
+    image: "postgres"
+    container_name: Database
+    ports:
+      - 5432:5432
+    expose:
+      - 5432
+    volumes:
+      - db_vol:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${PSQL_USR}
+      POSTGRES_PASSWORD: ${PSQL_PWD}
+      POSTGRES_DB: ${PSQL_DB}
+
+    stdin_open: true
+    restart: "always"
+    env_file:
+      - .env
+
+  backend:
+    image: fradriks/serverless-backend:latest
+    container_name: Serverless-backend
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    volumes:
+      - ./:/app
+
+    ports:
+      - ${PORT}:${PORT}
+
+    expose:
+      - 4000
+
+    depends_on:
+      - p_db
+
+  frontend:
+    image: fradriks/serverless-frontend:latest
+    container_name: Serverless-frontend
+
+    build:
+      context: ./
+      dockerfile: Dockerfile
+
+    volumes:
+      - ./:/app
+
+    ports:
+      - 3000:3000
+
+    expose:
+      - 3000
+
+    depends_on:
+      - p_db
+      - backend
