@@ -1,1 +1,7 @@
+.terraform 
+terraform.tfstate
+terraform.tfvars
+terraform.tfstate.backup
+Secrets
+Scripts
 Terraform
